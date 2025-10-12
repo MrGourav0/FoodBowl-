@@ -1,0 +1,18 @@
+body {
+  background-color: #212529; /* Bootstrap dark shade */
+  color: #fff; /* Text white for better visibility */
+}
+button{
+  background:white;
+  border-radius: 10px;
+  margin: 7px;
+  padding: 7px;
+  border: none;
+  display: flex;
+  justify-content: space-around;
+  width: 100px;
+}
+
+button:hover {
+  background: #323131;
+}
