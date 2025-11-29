@@ -11,7 +11,7 @@ export const placeOrder = async (req, res) => {
             return res.status(400).json({ message: "Cart is empty" });
         }
         
-        if (!deliveryAddress.text || !deliveryAddress.latitude || !deliveryAddress.longitude) {
+        if (!deliveryAddress.text || deliveryAddress.latitude === undefined || deliveryAddress.longitude === undefined) {
             return res.status(400).json({ message: "Complete delivery address required" });
         }
 

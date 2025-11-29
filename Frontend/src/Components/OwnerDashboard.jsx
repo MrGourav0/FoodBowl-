@@ -12,8 +12,8 @@ const OwnerDashboard = () => {
     items: [],
   });
 
-  const [newShop, setNewShop] = useState({ name: "", address: "", city: "", state: "" });
-  const [newItem, setNewItem] = useState({ name: "", price: "", foodType: "", category: "" });
+  const [newShop, setNewShop] = useState({ name: "", address: "", city: "", state: "", image: null });
+  const [newItem, setNewItem] = useState({ name: "", price: "", foodType: "", category: "", image: null });
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState("items");
   const [loading, setLoading] = useState(false);
@@ -72,13 +72,23 @@ const OwnerDashboard = () => {
     e.preventDefault();
     if (!newShop.name || !newShop.address || !newShop.city || !newShop.state) return;
     try {
-      const response = await axios.post(`${serverUrl}/api/shop`, newShop, { withCredentials: true });
+      const formData = new FormData();
+      formData.append('name', newShop.name);
+      formData.append('address', newShop.address);
+      formData.append('city', newShop.city);
+      formData.append('state', newShop.state);
+      if (newShop.image) {
+        formData.append('image', newShop.image);
+      }
+      const response = await axios.post(`${serverUrl}/api/shop`, formData, { 
+        withCredentials: true
+      });
       setShop({
         name: response.data.name,
         address: response.data.address,
         items: response.data.items || [],
       });
-      setNewShop({ name: "", address: "", city: "", state: "" });
+      setNewShop({ name: "", address: "", city: "", state: "", image: null });
     } catch (error) {
       console.log("Error adding shop:", error);
     }
@@ -88,18 +98,23 @@ const OwnerDashboard = () => {
     e.preventDefault();
     if (!newItem.name || !newItem.price || !newItem.category) return;
     try {
-      const response = await axios.post(`${serverUrl}/api/item`, {
-        name: newItem.name,
-        price: Number(newItem.price),
-        foodType: newItem.foodType.toLowerCase(),
-        category: newItem.category,
-      }, { withCredentials: true });
+      const formData = new FormData();
+      formData.append('name', newItem.name);
+      formData.append('price', Number(newItem.price));
+      formData.append('foodType', newItem.foodType.toLowerCase());
+      formData.append('category', newItem.category);
+      if (newItem.image) {
+        formData.append('image', newItem.image);
+      }
+      const response = await axios.post(`${serverUrl}/api/item`, formData, {
+        withCredentials: true
+      });
       setShop({
         name: response.data.name,
         address: response.data.address,
         items: response.data.items || [],
       });
-      setNewItem({ name: "", price: "", foodType: "", category: "" });
+      setNewItem({ name: "", price: "", foodType: "", category: "", image: null });
     } catch (error) {
       console.log("Error adding item:", error);
     }
@@ -146,7 +161,7 @@ const OwnerDashboard = () => {
           <div>
             {/* Shop Add Form */}
             <h4 className="text-white mb-3">🏪 Add/Update Shop Details</h4>
-            <form className="mb-5" onSubmit={handleAddShop}>
+            <form className="mb-5" onSubmit={handleAddShop} encType="multipart/form-data">
               <div className="row g-3 align-items-end">
                 <div className="col-md-3">
                   <label htmlFor="shopName" className="form-label text-white">
@@ -205,6 +220,18 @@ const OwnerDashboard = () => {
                   />
                 </div>
                 <div className="col-md-2">
+                  <label htmlFor="shopImage" className="form-label text-white">
+                    Shop Image
+                  </label>
+                  <input
+                    id="shopImage"
+                    type="file"
+                    className="form-control bg-secondary text-white border-success"
+                    accept="image/*"
+                    onChange={(e) => setNewShop({ ...newShop, image: e.target.files[0] })}
+                  />
+                </div>
+                <div className="col-md-2">
                   <button type="submit" className="btn btn-success w-100 py-2">
                     Add Shop
                   </button>
@@ -229,7 +256,7 @@ const OwnerDashboard = () => {
             {shop.name && (
               <>
                 <h5 className="mt-5 text-white">➕ Add New Food Item</h5>
-                <form className="mt-3" onSubmit={handleAddItem}>
+                <form className="mt-3" onSubmit={handleAddItem} encType="multipart/form-data">
                   <div className="row g-3 align-items-end">
                     <div className="col-md-3">
                       <label htmlFor="itemName" className="form-label text-white">
@@ -275,7 +302,7 @@ const OwnerDashboard = () => {
                         <option value="Non-Veg">Non-Veg</option>
                       </select>
                     </div>
-                    <div className="col-md-3">
+                    <div className="col-md-2">
                       <label htmlFor="category" className="form-label text-white">
                         Category
                       </label>
@@ -301,6 +328,18 @@ const OwnerDashboard = () => {
                       </select>
                     </div>
                     <div className="col-md-2">
+                      <label htmlFor="itemImage" className="form-label text-white">
+                        Item Image
+                      </label>
+                      <input
+                        id="itemImage"
+                        type="file"
+                        className="form-control bg-secondary text-white border-success"
+                        accept="image/*"
+                        onChange={(e) => setNewItem({ ...newItem, image: e.target.files[0] })}
+                      />
+                    </div>
+                    <div className="col-md-1">
                       <button type="submit" className="btn btn-success w-100 py-2">
                         Add Item
                       </button>
@@ -315,12 +354,19 @@ const OwnerDashboard = () => {
                       key={item.id}
                       className="list-group-item bg-dark text-white border border-success d-flex justify-content-between align-items-center mb-2 rounded-2"
                     >
-                      <span>
-                        <strong>{item.name}</strong> - ₹{item.price}
-                      </span>
-                      <span className={`badge rounded-pill ${item.foodType === 'veg' ? 'bg-success' : 'bg-danger'}`}>
-                        {item.foodType || 'N/A'}
-                      </span>
+                      <div className="d-flex align-items-center">
+                        <img src={item.image || 'https://via.placeholder.com/50'} alt={item.name} className="me-3 rounded-circle" style={{ width: '50px', height: '50px' }} />
+                        <span>
+                          <strong>{item.name}</strong> - ₹{item.price}
+                        </span>
+                      </div>
+                      <div>
+                        <input type="file" accept="image/*" style={{ display: 'none' }} id={`item-image-input-${item._id}`} onChange={(e) => handleUpdateItemImage(item._id, e.target.files[0])} />
+                        <label htmlFor={`item-image-input-${item._id}`} className="btn btn-sm btn-outline-primary me-2">Change Image</label>
+                        <span className={`badge rounded-pill ${item.foodType === 'veg' ? 'bg-success' : 'bg-danger'}`}>
+                          {item.foodType || 'N/A'}
+                        </span>
+                      </div>
                     </li>
                   ))}
                   {shop.items.length === 0 && (

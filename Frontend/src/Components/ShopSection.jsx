@@ -146,9 +146,9 @@ const ShopSection = () => {
                 <div className="col-md-4 mb-3" key={item._id}>
                   <div className="card h-100 shadow-sm">
                     {item.image && (
-                      <img 
-                        src={item.image} 
-                        className="card-img-top" 
+                      <img
+                        src={item.image}
+                        className="card-img-top"
                         alt={item.name}
                         style={{ height: '200px', objectFit: 'cover' }}
                       />
@@ -169,8 +169,8 @@ const ShopSection = () => {
                           </small>
                         </div>
                       )}
-                      <button 
-                        className="btn btn-success mt-auto" 
+                      <button
+                        className="btn btn-success mt-auto"
                         onClick={() => handleAddToCart(item)}
                       >
                         Add to Cart

@@ -11,6 +11,13 @@ const Cart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState({
+    text: '',
+    latitude: null,
+    longitude: null
+  });
+  const [addressError, setAddressError] = useState('');
 
   // Group items by shop
   const itemsByShop = items.reduce((acc, item) => {
@@ -33,7 +40,7 @@ const Cart = () => {
     dispatch(removeFromCart({ itemId, shopId }));
   };
 
-  const handlePlaceOrder = async () => {
+  const handlePlaceOrderClick = () => {
     if (!userData) {
       alert("Please login to place an order.");
       return;
@@ -44,7 +51,19 @@ const Cart = () => {
       return;
     }
 
+    setShowOrderModal(true);
+  };
+
+  const handleConfirmOrder = async () => {
+    // Validate delivery address
+    if (!deliveryAddress.text.trim()) {
+      setAddressError('Please enter a delivery address');
+      return;
+    }
+
+    setAddressError('');
     setLoading(true);
+
     try {
       // Group items by shop for separate orders
       const orders = Object.entries(itemsByShop).map(([shopId, shopData]) => ({
@@ -56,19 +75,24 @@ const Cart = () => {
           shop: shopId
         })),
         paymentMethod: 'cash',
-        deliveryAddress: { text: 'User Address', latitude: 0, longitude: 0 },
+        deliveryAddress: {
+          text: deliveryAddress.text,
+          latitude: deliveryAddress.latitude || 0,
+          longitude: deliveryAddress.longitude || 0
+        },
         totalAmount: shopData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
       }));
 
       // Place orders for each shop
-      const orderPromises = orders.map(order => 
+      const orderPromises = orders.map(order =>
         axios.post(`${serverUrl}/api/order`, order, { withCredentials: true })
       );
 
       await Promise.all(orderPromises);
-      
-      alert('Orders placed successfully!');
+
+      alert('Orders placed successfully! Cash on Delivery selected.');
       dispatch(clearCart());
+      setShowOrderModal(false);
       navigate('/orders');
     } catch (error) {
       console.error('Error placing order:', error);
@@ -76,6 +100,14 @@ const Cart = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAddressChange = (e) => {
+    setDeliveryAddress({
+      ...deliveryAddress,
+      text: e.target.value
+    });
+    if (addressError) setAddressError('');
   };
 
   if (items.length === 0) {
@@ -229,9 +261,9 @@ const Cart = () => {
                 <strong className="text-success">₹{totalAmount}</strong>
               </div>
               
-              <button 
+              <button
                 className="btn btn-success btn-lg w-100 mb-3"
-                onClick={handlePlaceOrder}
+                onClick={handlePlaceOrderClick}
                 disabled={loading || !userData}
               >
                 {loading ? (
@@ -241,8 +273,8 @@ const Cart = () => {
                   </>
                 ) : (
                   <>
-                    <i className="fa-solid fa-credit-card me-2"></i>
-                    Place Order
+                    <i className="fa-solid fa-money-bill-wave me-2"></i>
+                    Place Order (Cash on Delivery)
                   </>
                 )}
               </button>
@@ -265,6 +297,127 @@ const Cart = () => {
           </div>
         </div>
       </div>
+
+      {/* Order Confirmation Modal */}
+      {showOrderModal && (
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex="-1">
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header bg-success text-white">
+                <h5 className="modal-title">
+                  <i className="fa-solid fa-shopping-cart me-2"></i>
+                  Confirm Your Order
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  onClick={() => setShowOrderModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                {/* Order Summary */}
+                <div className="mb-4">
+                  <h6 className="text-success mb-3">
+                    <i className="fa-solid fa-list me-2"></i>
+                    Order Summary
+                  </h6>
+                  {Object.entries(itemsByShop).map(([shopId, shopData]) => (
+                    <div key={shopId} className="card mb-3">
+                      <div className="card-header">
+                        <strong>{shopData.shopName}</strong>
+                      </div>
+                      <div className="card-body">
+                        {shopData.items.map((item) => (
+                          <div key={item.itemId} className="d-flex justify-content-between mb-2">
+                            <span>{item.name} x {item.quantity}</span>
+                            <span>₹{item.price * item.quantity}</span>
+                          </div>
+                        ))}
+                        <hr />
+                        <div className="d-flex justify-content-between">
+                          <strong>Subtotal:</strong>
+                          <strong>₹{shopData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)}</strong>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="d-flex justify-content-between mt-3 pt-3 border-top">
+                    <h5>Total Amount:</h5>
+                    <h5 className="text-success">₹{totalAmount}</h5>
+                  </div>
+                </div>
+
+                {/* Payment Method */}
+                <div className="mb-4">
+                  <h6 className="text-success mb-3">
+                    <i className="fa-solid fa-credit-card me-2"></i>
+                    Payment Method
+                  </h6>
+                  <div className="alert alert-info">
+                    <i className="fa-solid fa-money-bill-wave me-2"></i>
+                    <strong>Cash on Delivery</strong> - Pay when your order arrives at your doorstep.
+                  </div>
+                </div>
+
+                {/* Delivery Address */}
+                <div className="mb-4">
+                  <h6 className="text-success mb-3">
+                    <i className="fa-solid fa-map-marker-alt me-2"></i>
+                    Delivery Address
+                  </h6>
+                  <div className="form-group">
+                    <textarea
+                      className={`form-control ${addressError ? 'is-invalid' : ''}`}
+                      rows="3"
+                      placeholder="Enter your complete delivery address (house number, street, area, city, pincode)"
+                      value={deliveryAddress.text}
+                      onChange={handleAddressChange}
+                    ></textarea>
+                    {addressError && (
+                      <div className="invalid-feedback">
+                        {addressError}
+                      </div>
+                    )}
+                  </div>
+                  <small className="text-muted">
+                    <i className="fa-solid fa-info-circle me-1"></i>
+                    Please provide accurate address for timely delivery
+                  </small>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowOrderModal(false)}
+                  disabled={loading}
+                >
+                  <i className="fa-solid fa-times me-1"></i>
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-success"
+                  onClick={handleConfirmOrder}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                      Placing Order...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fa-solid fa-check me-1"></i>
+                      Confirm Order
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

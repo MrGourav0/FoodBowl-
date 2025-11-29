@@ -36,68 +36,72 @@ const Navbar = ({ setSearch }) => {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div className="collapse navbar-collapse" id="navbarNav">
-          {/* 🟢 Left-side nav items */}
-          <ul
-            className="navbar-nav me-auto d-flex align-items-center"
-            style={{ gap: "25px" }}
-          >
-            <li className="nav-item">
-              <Link className="nav-link active" to="/">
-                Home
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/Menu">
-                Menu
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/Orders">
-                Orders
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/About">
-                About
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link
-                className="nav-link d-flex align-items-center"
-                to="/location"
-                style={{ gap: "5px" }}
-              >
-                <i className="fa-solid fa-location-dot"></i>
-                {/* Show the city name if available, otherwise show "Location" */}
-                {city}
-              </Link>
-            </li>
-          </ul>
-
-          <div className="d-flex align-items-center" style={{ gap: "120px" }}>
-            <Link
-              className="navbar-brand d-flex align-items-center fs-2"
-              to="/"
-              style={{ gap: "8px" }}
+        <div className="collapse navbar-collapse d-flex justify-content-between align-items-center" id="navbarNav">
+          {/* 🟢 Left-side nav items - visible only for users */}
+          {userData && userData.role === "user" && (
+            <ul
+              className="navbar-nav d-flex align-items-center"
+              style={{ gap: "25px" }}
             >
-              <img
-                src="/src/public/logoburger.png"
-                style={{ height: "50px" }}
-                alt="logo"
-              />
-              <span
-                style={{
-                  fontFamily: "initial",
-                  fontWeight: "bold",
-                  fontSize: "1.75rem",
-                }}
-              >
-                <span style={{ color: "#fefefec0" }}>Food</span>
-                <span style={{ color: "#ffdd00aa" }}>Bowl</span>
-              </span>
-            </Link>
+              <li className="nav-item">
+                <Link className="nav-link active" to="/">
+                  Home
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/Menu">
+                  Menu
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/Orders">
+                  Orders
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/About">
+                  About
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link
+                  className="nav-link d-flex align-items-center"
+                  to="/location"
+                  style={{ gap: "5px" }}
+                >
+                  <i className="fa-solid fa-location-dot"></i>
+                  {/* Show the city name if available, otherwise show "Location" */}
+                  {city}
+                </Link>
+              </li>
+            </ul>
+          )}
 
+          {/* Center: Logo - always visible and centered */}
+          <Link
+            className="navbar-brand d-flex align-items-center fs-2 mx-auto"
+            to="/"
+            style={{ gap: "8px" }}
+          >
+            <img
+              src="/src/public/logoburger.png"
+              style={{ height: "50px" }}
+              alt="logo"
+            />
+            <span
+              style={{
+                fontFamily: "initial",
+                fontWeight: "bold",
+                fontSize: "1.75rem",
+              }}
+            >
+              <span style={{ color: "#fefefec0" }}>Food</span>
+              <span style={{ color: "#ffdd00aa" }}>Bowl</span>
+            </span>
+          </Link>
+
+          {/* Right: Search and Login/Logout */}
+          <div className="d-flex align-items-center" style={{ gap: "10px" }}>
             {/* Conditionally render the search bar only if setSearch is provided */}
             {setSearch && userData && userData.role === "user" && (
               <form className="d-flex" style={{ gap: "1px" }} onSubmit={(e) => e.preventDefault()}>

@@ -16,7 +16,7 @@ import deliveryRoutes from "./routes/delivery.routes.js"
 const app=express()
 const server=http.createServer(app)
 
-const port=process.env.PORT || 5000
+const port=process.env.PORT || 5001
 app.use(cors({
     origin:["http://localhost:5173", "http://localhost:5174"],
     credentials:true
