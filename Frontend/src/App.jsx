@@ -20,7 +20,7 @@ import DeliveryBoyDashboard from "./Components/DeliveryBoyDashboard";
 
 
 // It's better to keep the server URL in an environment variable
-export const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:8000";
+export const serverUrl = import.meta.env.VITE_SERVER_URL ;
 
 const AppRoutes = () => {
 

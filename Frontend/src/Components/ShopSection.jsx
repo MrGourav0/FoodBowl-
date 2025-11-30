@@ -12,7 +12,7 @@ const ShopSection = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:8000";
+  const serverUrl = import.meta.env.VITE_SERVER_URL ;
 
   useEffect(() => {
     if (city) {

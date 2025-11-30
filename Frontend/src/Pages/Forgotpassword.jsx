@@ -10,7 +10,7 @@ const Forgotpassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:8000";
+  const serverUrl = import.meta.env.VITE_SERVER_URL ;
   const navigate = useNavigate();
 
   // Step 1: Send OTP
