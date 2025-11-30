@@ -54,8 +54,8 @@ const Footer = () => {
           <div className="col-md-2 mb-4">
             <h6 className="text-uppercase">Download App</h6>
             <div className="d-flex flex-column gap-2">
-              <img src="/src/public/gogll.png" alt="Google Play" style={{ width: '40px',  height:'40px'}} />
-              <img src="/src/public/new.png" alt="App Store" style={{ width: '40px', height:'40px'}} />
+              <img src="/gogll.png" alt="Google Play" style={{ width: '40px',  height:'40px'}} />
+              <img src="/new.png" alt="App Store" style={{ width: '40px', height:'40px'}} />
             </div>
           </div>
 

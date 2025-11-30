@@ -8,28 +8,28 @@ const Carousal = () => {
   const slides = [
     {
       id: 1,
-      image: "/src/public/1.jpg",
+      image: "/1.jpg",
       title: "Delicious Burger",
       description: "Fresh & Hot, just for you!",
       alt: "Burger"
     },
     {
       id: 2,
-      image: "/src/public/2.jpg",
+      image: "/2.jpg",
       title: "Cheesy Pizza",
       description: "Best in town, straight from the oven!",
       alt: "Pizza"
     },
     {
       id: 3,
-      image: "/src/public/3.jpg",
+      image: "/3.jpg",
       title: "Spicy Momos",
       description: "Street style, with love ❤️",
       alt: "Momos"
     },
     {
       id: 4,
-      image: "/src/public/4.jpg",
+      image: "/4.jpg",
       title: "Creamy Ice Cream",
       description: "Cool down your cravings 🍨",
       alt: "Ice Cream"

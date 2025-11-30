@@ -84,7 +84,7 @@ const Navbar = ({ setSearch }) => {
             style={{ gap: "8px" }}
           >
             <img
-              src="/src/public/logoburger.png"
+              src="/logoburger.png"
               style={{ height: "50px" }}
               alt="logo"
             />
