@@ -60,7 +60,7 @@ const Menu = () => {
                 <p className="card-text text-muted">{item.desc}</p>
                 <h6 className="text-success fw-bold mb-3">{item.price}</h6>
                 <button className="btn btn-outline-danger">
-                  Order Now 🚀
+                  Order Now 
                 </button>
               </div>
             </div>
