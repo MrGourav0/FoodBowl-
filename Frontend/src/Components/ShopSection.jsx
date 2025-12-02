@@ -97,7 +97,16 @@ const ShopSection = () => {
               ) : (
                 shops.map(shop => (
                   <div className="col-md-4 mb-3" key={shop._id}>
-                    <div className="card h-100 shadow-sm" onClick={() => selectShop(shop)} style={{ cursor: 'pointer' }}>
+                    <div className="card h-100 shadow-sm" onClick={() => selectShop(shop)} style={{ cursor: 'pointer' }} >
+                      <img
+                        src={shop.image || 'https://via.placeholder.com/400x200.png?text=No+Image'}
+                        className="card-img-top"
+                        alt={shop.name}
+                        style={{
+                          height: '200px',
+                          objectFit: 'cover'
+                        }}
+                      />
                       <div className="card-body">
                         <h5 className="card-title">{shop.name}</h5>
                         <p className="card-text text-muted">{shop.address}</p>
