@@ -13,9 +13,9 @@ const cartSlice = createSlice({
       const existingItem = state.items.find(
         cartItem => cartItem.itemId === item._id && cartItem.shopId === shopId
       );
-      
+
       if (existingItem) {
-        existingItem.quantity += 1;
+        existingItem.quantity += item.quantity || 1; // Agar item.quantity hai to use karein, warna 1
       } else {
         state.items.push({
           itemId: item._id,
@@ -24,12 +24,12 @@ const cartSlice = createSlice({
           image: item.image,
           foodType: item.foodType,
           category: item.category,
-          quantity: 1,
+          quantity: item.quantity || 1, // Agar item.quantity hai to use karein, warna 1
           shopId: shopId,
           shopName: shopName,
+          selectedSize: item.selectedSize, // selectedSize ko bhi store karein agar available hai
         });
       }
-      
       // Update totals
       state.totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
       state.totalAmount = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);

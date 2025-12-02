@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { addToCart } from '../redux/cartSlice';
+import Card from './Card'; // Import the Card component
 
 const ShopSection = () => {
   const city = useSelector((state) => state.user.city);
@@ -48,10 +49,11 @@ const ShopSection = () => {
   };
 
   const handleAddToCart = (item) => {
+    // item object ab Card component se selected quantity aur price ke saath aayega
     dispatch(addToCart({
       item,
-      shopId: selectedShop._id,
-      shopName: selectedShop.name
+      shopId: selectedShop._id, // selectedShop._id ko seedhe pass karein
+      shopName: selectedShop.name // selectedShop.name ko seedhe pass karein
     }));
     
     // Show success message
@@ -144,39 +146,13 @@ const ShopSection = () => {
               ) : (
               items.map(item => (
                 <div className="col-md-4 mb-3" key={item._id}>
-                  <div className="card h-100 shadow-sm">
-                    {item.image && (
-                      <img
-                        src={item.image}
-                        className="card-img-top"
-                        alt={item.name}
-                        style={{ height: '200px', objectFit: 'cover' }}
-                      />
-                    )}
-                    <div className="card-body d-flex flex-column">
-                      <h5 className="card-title">{item.name}</h5>
-                      <p className="card-text text-muted">{item.category}</p>
-                      <div className="d-flex justify-content-between align-items-center mb-2">
-                        <span className="h5 text-black">₹{item.price}</span>
-                        <span className={`badge ${item.foodType === 'veg' ? 'bg-success' : 'bg-danger'}`}>
-                          {item.foodType.toUpperCase()}
-                        </span>
-                      </div>
-                      {item.rating && item.rating.count > 0 && (
-                        <div className="mb-2">
-                          <small className="text-warning">
-                            ⭐ {item.rating.average.toFixed(1)} ({item.rating.count} reviews)
-                          </small>
-                        </div>
-                      )}
-                      <button
-                        className="btn btn-success mt-auto"
-                        onClick={() => handleAddToCart(item)}
-                      >
-                        Add to Cart
-                      </button>
-                    </div>
-                  </div>
+                  {/* Card component ka istemal karein */}
+                  <Card
+                    item={item} // Poora item object pass karein
+                    onAddToCart={handleAddToCart} // handleAddToCart function pass karein
+                    shopId={selectedShop._id} // Shop ID pass karein
+                    shopName={selectedShop.name} // Shop Name pass karein
+                  />
                 </div>
               ))
             )}

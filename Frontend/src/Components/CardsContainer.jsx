@@ -99,11 +99,7 @@ const CardsContainer = ({ search }) => {
         {filteredItems.length > 0 ? (
           filteredItems.map((item) => (
             <div className="col-md-3 mb-4" key={item.id}>
-              <Card
-                title={item.title}
-                img={item.img}
-                desc={item.desc}
-                price={item.price}
+              <Card item={item} // Poora item object pass karein
               />
             </div>
           ))
