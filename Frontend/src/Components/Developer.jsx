@@ -14,7 +14,7 @@ const Developer = () => {
 
       <div className=" ">
         <img
-          src="/src/public/gourav.jpg"
+          src="/gourav.jpg"
           alt="host"
           className=""
           style={{ width: "150px", height: "180px", objectFit: "cover" , }}
