@@ -98,7 +98,7 @@ const CardsContainer = ({ search }) => {
       <div className="row">
         {filteredItems.length > 0 ? (
           filteredItems.map((item) => (
-            <div className="col-md-3 mb-4" key={item.id}>
+            <div className="col-3 mb-4" key={item.id}>
               <Card item={item} // Poora item object pass karein
               />
             </div>

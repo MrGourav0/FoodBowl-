@@ -18,7 +18,7 @@ const About = () => {
 
         {/* Info Section */}
         <div className="row g-4">
-          <div className="col-md-4">
+          <div className="col-12 col-md-4">
             <div className="">
               <div className="card-body text-center">
                 <h3 className="">🍴 Fresh & Healthy</h3>
@@ -30,7 +30,7 @@ const About = () => {
             </div>
           </div>
 
-          <div className="col-md-4">
+          <div className="col-12 col-md-4">
             <div className="">
               <div className="card-body text-center">
                 <h3 className="">⚡ Super Fast</h3>
@@ -42,7 +42,7 @@ const About = () => {
             </div>
           </div>
 
-          <div className="col-md-4">
+          <div className="col-12 col-md-4">
             <div className="">
               <div className="card-body text-center">
                 <h3 className="">💚 Customer Care</h3>

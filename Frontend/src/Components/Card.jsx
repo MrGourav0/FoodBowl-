@@ -29,8 +29,8 @@ const Card = ({ item, onAddToCart, shopId, shopName }) => {
 
   return (
     <div
-      className="card mt-3 rounded-0"
-      style={{ width: "18rem", maxHeight: "380px" }}
+      className="card mt-3 rounded-0 w-100"
+      style={{ maxWidth: "18rem", maxHeight: "380px" }}
     >
       <img
         src={item.image || item.img} // item.image for backend, item.img for static
