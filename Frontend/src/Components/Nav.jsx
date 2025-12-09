@@ -79,40 +79,21 @@ const Navbar = ({ setSearch }) => {
 
           {/* Center: Logo - always visible and centered */}
           <Link
-            className="navbar-brand d-flex align-items-center fs-4 fs-md-2 mx-auto"
+            className="navbar-brand d-flex align-items-center fs-2 mx-auto"
             to="/"
             style={{ gap: "8px" }}
           >
             <img
               src="/logoburger.png"
-              style={{ height: "40px" }}
-              className="d-block d-md-none"
-              alt="logo"
-            />
-            <img
-              src="/logoburger.png"
               style={{ height: "50px" }}
-              className="d-none d-md-block"
               alt="logo"
             />
-            <span
-              style={{
-                fontFamily: "initial",
-                fontWeight: "bold",
-                fontSize: "1.5rem",
-              }}
-              className="d-block d-md-none"
-            >
-              <span style={{ color: "#fefefec0" }}>Food</span>
-              <span style={{ color: "#ffdd00aa" }}>Bowl</span>
-            </span>
             <span
               style={{
                 fontFamily: "initial",
                 fontWeight: "bold",
                 fontSize: "1.75rem",
               }}
-              className="d-none d-md-block"
             >
               <span style={{ color: "#fefefec0" }}>Food</span>
               <span style={{ color: "#ffdd00aa" }}>Bowl</span>
