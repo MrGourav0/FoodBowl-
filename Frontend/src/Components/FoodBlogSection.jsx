@@ -5,7 +5,7 @@ const FoodBlogSection = () => {
     <div className="container my-5">
       {/* Section Heading */}
       <h1 className="text-center fw-bold mb-4 text-white">Our Food Blog</h1>
-      <p className="text-center text-muted mb-5">
+      <p className="text-center text-white mb-5">
         Discover trending recipes, quick bites, and healthy food inspirations from top apps.
       </p>
 
