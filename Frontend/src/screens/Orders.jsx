@@ -18,7 +18,7 @@ const Orders = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${serverUrl}/api/order/user`, {
+      const response = await axios.get(`${serverUrl}/api/orders/user`, {
         withCredentials: true
       });
       setOrders(response.data);

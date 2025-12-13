@@ -18,9 +18,13 @@ import OwnerDashboard from "./Components/OwnerDashboard";
 import DeliveryBoy from "./Components/DeliveryBoy";
 import DeliveryBoyDashboard from "./Components/DeliveryBoyDashboard";
 
+console.log("MODE =", import.meta.env.MODE);
+console.log("serverUrl =", import.meta.env.VITE_SERVER_URL);
 
 // It's better to keep the server URL in an environment variable
-export const serverUrl = import.meta.env.VITE_SERVER_URL ;
+// src/App.jsx
+export const serverUrl = import.meta.env.VITE_SERVER_URL || (import.meta.env.MODE === "development" ? "http://localhost:5001" : "https://your-render-backend-url.onrender.com");
+
 
 const AppRoutes = () => {
 

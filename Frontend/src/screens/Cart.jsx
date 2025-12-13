@@ -18,6 +18,7 @@ const Cart = () => {
     longitude: null
   });
   const [addressError, setAddressError] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('cash'); // 'cash' or 'razorpay'
 
   // Group items by shop
   const itemsByShop = items.reduce((acc, item) => {
@@ -54,6 +55,59 @@ const Cart = () => {
     setShowOrderModal(true);
   };
 
+  // helper to open Razorpay checkout
+  const openRazorpayCheckout = (rOrder, appOrderId) => {
+    return new Promise((resolve, reject) => {
+      try {
+        const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || "<rzp_test_xxx>";
+
+        const options = {
+          key: razorpayKey,
+          amount: rOrder.amount,
+          currency: rOrder.currency || "INR",
+          name: "FoodBowl",
+          description: `Order #${appOrderId}`,
+          order_id: rOrder.id,
+          prefill: {
+            name: userData?.fullName || userData?.name || "",
+            email: userData?.email || "",
+            contact: userData?.mobile || userData?.phone || ""
+          },
+          theme: { color: "#F37254" },
+          handler: async function (response) {
+            // verify on server
+            try {
+              await axios.post(
+                `${serverUrl}/api/orders/payment/verify`,
+                {
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  appOrderId
+                },
+                { withCredentials: true }
+              );
+
+              resolve({ success: true });
+            } catch (verifyErr) {
+              console.error("Verification error:", verifyErr);
+              reject(new Error("Payment verified on client but server verification failed."));
+            }
+          }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.on("payment.failed", function (resp) {
+          console.error("payment.failed:", resp.error);
+          reject(new Error(resp.error?.description || "Payment failed"));
+        });
+        rzp.open();
+      } catch (err) {
+        reject(err);
+      }
+    });
+  };
+
   const handleConfirmOrder = async () => {
     // Validate delivery address
     if (!deliveryAddress.text.trim()) {
@@ -65,38 +119,100 @@ const Cart = () => {
     setLoading(true);
 
     try {
-      // Group items by shop for separate orders
-      const orders = Object.entries(itemsByShop).map(([shopId, shopData]) => ({
-        cartItems: shopData.items.map(item => ({
+      if (paymentMethod === 'cash') {
+        // Existing behavior: place separate orders per shop (cash on delivery)
+        const orders = Object.entries(itemsByShop).map(([shopId, shopData]) => ({
+          cartItems: shopData.items.map(item => ({
+            id: item.itemId,
+            quantity: item.quantity,
+            price: item.price,
+            name: item.name,
+            shop: shopId
+          })),
+          paymentMethod: 'cash',
+          deliveryAddress: {
+            text: deliveryAddress.text,
+            latitude: deliveryAddress.latitude || 0,
+            longitude: deliveryAddress.longitude || 0
+          },
+          totalAmount: shopData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+        }));
+
+        // Place orders for each shop
+        const orderPromises = orders.map(order =>
+          axios.post(`${serverUrl}/api/orders/`, order, { withCredentials: true })
+        );
+
+        await Promise.all(orderPromises);
+
+        alert('Orders placed successfully! Cash on Delivery selected.');
+        dispatch(clearCart());
+        setShowOrderModal(false);
+        navigate('/orders');
+      } else {
+        // Online payment via Razorpay
+        // Create a single app order for the whole cart (backend will group by shop)
+        const cartItemsPayload = items.map(item => ({
           id: item.itemId,
           quantity: item.quantity,
           price: item.price,
           name: item.name,
-          shop: shopId
-        })),
-        paymentMethod: 'cash',
-        deliveryAddress: {
-          text: deliveryAddress.text,
-          latitude: deliveryAddress.latitude || 0,
-          longitude: deliveryAddress.longitude || 0
-        },
-        totalAmount: shopData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-      }));
+          shop: item.shopId
+        }));
 
-      // Place orders for each shop
-      const orderPromises = orders.map(order =>
-        axios.post(`${serverUrl}/api/order`, order, { withCredentials: true })
-      );
+        const placeResp = await axios.post(
+          `${serverUrl}/api/orders/`,
+          {
+            cartItems: cartItemsPayload,
+            paymentMethod: 'razorpay',
+            deliveryAddress: {
+              text: deliveryAddress.text,
+              latitude: deliveryAddress.latitude || 0,
+              longitude: deliveryAddress.longitude || 0
+            },
+            totalAmount // rupees (backend converts to paise)
+          },
+          { withCredentials: true }
+        );
 
-      await Promise.all(orderPromises);
+        if (!placeResp || !placeResp.data) {
+          throw new Error("Failed to create order on server");
+        }
 
-      alert('Orders placed successfully! Cash on Delivery selected.');
-      dispatch(clearCart());
-      setShowOrderModal(false);
-      navigate('/orders');
+        const appOrder = placeResp.data.order || placeResp.data.order; // backend returns { order, razorpayOrder }
+        let razorpayOrder = placeResp.data.razorpayOrder || (placeResp.data.order && placeResp.data.order.razorpay_order) || null;
+
+        // fallback: if razorpayOrder not present, call create-razorpay endpoint
+        if (!razorpayOrder) {
+          try {
+            const createResp = await axios.post(
+              `${serverUrl}/api/orders/payment/create`,
+              { appOrderId: appOrder._id },
+              { withCredentials: true }
+            );
+            razorpayOrder = createResp.data.order;
+          } catch (createErr) {
+            console.error("Failed to create razorpay order:", createErr);
+            throw new Error("Payment initialization failed. Please try again.");
+          }
+        }
+
+        if (!razorpayOrder || !razorpayOrder.id) {
+          throw new Error("Razorpay order not returned by server");
+        }
+
+        // Open Razorpay Checkout and wait for result
+        await openRazorpayCheckout(razorpayOrder, appOrder._id);
+
+        // If reached here, payment succeeded + verification succeeded on server
+        alert("Payment successful! Order confirmed.");
+        dispatch(clearCart());
+        setShowOrderModal(false);
+        navigate('/orders');
+      }
     } catch (error) {
       console.error('Error placing order:', error);
-      alert('Failed to place order. Please try again.');
+      alert(error?.message || 'Failed to place order. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -274,11 +390,12 @@ const Cart = () => {
                 ) : (
                   <>
                     <i className="fa-solid fa-money-bill-wave me-2"></i>
-                    Place Order (Cash on Delivery)
+                    Place Order
                   </>
                 )}
               </button>
               
+
               {!userData && (
                 <div className="alert alert-warning">
                   <i className="fa-solid fa-exclamation-triangle me-2"></i>
@@ -353,9 +470,49 @@ const Cart = () => {
                     <i className="fa-solid fa-credit-card me-2"></i>
                     Payment Method
                   </h6>
-                  <div className="alert alert-info">
-                    <i className="fa-solid fa-money-bill-wave me-2"></i>
-                    <strong>Cash on Delivery</strong> - Pay when your order arrives at your doorstep.
+
+                  <div className="form-check">
+                    <input
+                      className="form-check-input"
+                      type="radio"
+                      name="paymentMethod"
+                      id="paymentCash"
+                      value="cash"
+                      checked={paymentMethod === 'cash'}
+                      onChange={() => setPaymentMethod('cash')}
+                    />
+                    <label className="form-check-label" htmlFor="paymentCash">
+                      <i className="fa-solid fa-money-bill-wave me-2"></i>
+                      Cash on Delivery
+                    </label>
+                  </div>
+
+                  <div className="form-check mt-2">
+                    <input
+                      className="form-check-input"
+                      type="radio"
+                      name="paymentMethod"
+                      id="paymentOnline"
+                      value="razorpay"
+                      checked={paymentMethod === 'razorpay'}
+                      onChange={() => setPaymentMethod('razorpay')}
+                    />
+                    <label className="form-check-label" htmlFor="paymentOnline">
+                      <i className="fa-solid fa-credit-card me-2"></i>
+                      Pay Online (Razorpay)
+                    </label>
+                  </div>
+
+                  <div className="mt-3">
+                    {paymentMethod === 'cash' ? (
+                      <div className="alert alert-info">
+                        <strong>Cash on Delivery</strong> - Pay when your order arrives.
+                      </div>
+                    ) : (
+                      <div className="alert alert-warning">
+                        <strong>Online Payment</strong> - You will be redirected to Razorpay checkout.
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -404,7 +561,7 @@ const Cart = () => {
                   {loading ? (
                     <>
                       <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                      Placing Order...
+                      Processing...
                     </>
                   ) : (
                     <>

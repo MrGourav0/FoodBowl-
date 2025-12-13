@@ -68,7 +68,7 @@ const OwnerDashboard = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${serverUrl}/api/order/owner`, {
+      const response = await axios.get(`${serverUrl}/api/orders/owner`, {
         withCredentials: true,
       });
       setOrders(response.data || []);
@@ -89,7 +89,7 @@ const OwnerDashboard = () => {
     try {
       setLoading(true);
       await axios.put(
-        `${serverUrl}/api/order/status`,
+        `${serverUrl}/api/orders/status`,
         {
           orderId,
           shopOrderId,
